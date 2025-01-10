@@ -1,0 +1,1179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Franmarine - Biofouling Management Plan Generator</title>
+  <!-- Responsive meta -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- FontAwesome Icons -->
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    integrity="sha512-yKN3LDwZ1+u+PkhoLBRaln6zTU5Hh9yK3K7xv49rCjTxhdtfY2V9n4+VaR2KZApZPj73HW3B4Lj7IrF7LUx4Mg=="
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"
+  />
+  <!-- Handlebars from CDN -->
+  <script
+    src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.7.7/handlebars.min.js"
+    crossorigin="anonymous"
+    defer
+  ></script>
+
+  <style>
+    /* 
+      =========================================================
+      ROOT VARIABLES (based on your provided style cues)
+      =========================================================
+    */
+    :root {
+      --primary-blue: #0A2B7B;       /* Dark navy blue from snippet */
+      --secondary-blue: #2851E7;     /* Brighter accent blue */
+      --light-blue: #F5F7FF;
+      --text-color: #333;
+      --light-text: #FFF;
+      --dark-bg: #0A2B7B;
+      --light-bg: #FFF;
+      --border-color: #E5E5E5;
+      --max-width: 1200px;
+    }
+
+    /* 
+      =========================================================
+      RESET / GLOBAL STYLES
+      =========================================================
+    */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+      color: var(--text-color);
+      background-color: var(--light-bg);
+    }
+
+    img {
+      max-width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    /* 
+      =========================================================
+      NAVBAR
+      =========================================================
+    */
+    .navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      background-color: var(--light-bg);
+      z-index: 1000;
+      padding: 15px 0;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    .navbar .container {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 20px;
+    }
+    .nav-toggle {
+      display: none;
+      flex-direction: column;
+      cursor: pointer;
+      gap: 6px;
+    }
+    .nav-toggle span {
+      width: 25px;
+      height: 3px;
+      background-color: var(--primary-blue);
+    }
+    .logo img {
+      height: 80px;
+      width: auto;
+    }
+    .nav-links {
+      display: flex;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      transition: all 0.3s ease;
+    }
+    .nav-links li {
+      margin-left: 30px;
+    }
+    .nav-links a {
+      color: var(--primary-blue);
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      transition: color 0.3s ease;
+    }
+    .nav-links a:hover,
+    .nav-links a.active {
+      color: var(--secondary-blue);
+    }
+
+    /* 
+      =========================================================
+      HERO SECTION
+      =========================================================
+    */
+    .hero {
+      position: relative;
+      height: 60vh;
+      background-color: var(--primary-blue);
+      background-image: linear-gradient(rgba(10, 43, 123, 0.8), rgba(10, 43, 123, 0.8)),
+        url("https://via.placeholder.com/1920x1080");
+      background-size: cover;
+      background-position: center;
+      display: flex;
+      align-items: center;
+      margin-top: 80px; /* space for fixed navbar */
+      overflow: hidden;
+    }
+    .hero-content {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      color: var(--light-text);
+      text-align: left;
+      position: relative;
+      z-index: 2;
+    }
+    .hero-content h1 {
+      font-size: 3rem;
+      margin-bottom: 0.5em;
+      color: var(--light-text);
+      text-transform: uppercase;
+    }
+    .hero-content p {
+      font-size: 1rem;
+      max-width: 600px;
+      margin-bottom: 1.5em;
+    }
+    .hero-content a.btn-primary {
+      background-color: var(--secondary-blue);
+      color: var(--light-text);
+      padding: 12px 30px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-weight: 600;
+      transition: background 0.3s ease;
+    }
+    .hero-content a.btn-primary:hover {
+      background-color: #153498;
+    }
+
+    /* 
+      =========================================================
+      BFMP GENERATOR SECTION
+      =========================================================
+    */
+    .bfmp-section {
+      padding: 60px 20px;
+    }
+    .bfmp-section .container {
+      max-width: var(--max-width);
+      margin: 0 auto;
+    }
+    .bfmp-section h2 {
+      font-size: 2rem;
+      color: var(--primary-blue);
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+    }
+    .bfmp-section p.intro-text {
+      font-size: 1rem;
+      margin-bottom: 2rem;
+      max-width: 800px;
+    }
+
+    /* Form Layout */
+    .bfmp-form-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 40px;
+      margin-top: 2rem;
+    }
+    .bfmp-form {
+      background-color: var(--light-blue);
+      padding: 20px;
+      border-radius: 6px;
+    }
+    .bfmp-form .form-field {
+      margin-bottom: 1.2rem;
+    }
+    .bfmp-form label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 0.3rem;
+      color: var(--primary-blue);
+    }
+    .bfmp-form input[type="text"],
+    .bfmp-form input[type="date"],
+    .bfmp-form input[type="file"],
+    .bfmp-form textarea {
+      width: 100%;
+      padding: 0.5rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 0.95rem;
+    }
+    .bfmp-form textarea {
+      height: 80px;
+      resize: vertical;
+    }
+    .bfmp-form .note {
+      font-size: 0.85rem;
+      color: #666;
+      margin-top: 0.3rem;
+    }
+    .bfmp-form button {
+      background-color: var(--secondary-blue);
+      color: #fff;
+      font-weight: 600;
+      text-transform: uppercase;
+      padding: 0.7rem 1.5rem;
+      border: none;
+      cursor: pointer;
+      border-radius: 4px;
+      margin-top: 1rem;
+    }
+    .bfmp-form button:hover {
+      background-color: #153498;
+    }
+
+    /* Help / Instructions Column */
+    .bfmp-help {
+      background-color: #fff;
+      padding: 20px;
+      border: 1px solid #eee;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      line-height: 1.4;
+      color: #444;
+    }
+    .bfmp-help h3 {
+      margin-bottom: 1rem;
+      color: var(--primary-blue);
+      font-size: 1.2rem;
+    }
+    .bfmp-help p {
+      margin-bottom: 1rem;
+    }
+    .bfmp-help i {
+      color: var(--secondary-blue);
+      margin-right: 0.4rem;
+    }
+
+    /* 
+      =========================================================
+      FOOTER
+      =========================================================
+    */
+    footer {
+      background-color: var(--primary-blue);
+      color: var(--light-text);
+      padding: 40px 20px;
+      margin-top: 60px;
+    }
+    .footer-content {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+    .footer-content img {
+      height: 80px;
+      margin-bottom: 1rem;
+    }
+    .footer-links {
+      margin: 1.5rem 0;
+    }
+    .footer-links a {
+      color: var(--light-text);
+      text-decoration: none;
+      margin: 0 10px;
+      font-size: 0.9rem;
+      opacity: 0.8;
+      transition: opacity 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .footer-links a:hover {
+      opacity: 1;
+    }
+    .footer-bottom {
+      margin-top: 2rem;
+      font-size: 0.8rem;
+      opacity: 0.8;
+    }
+
+    /* 
+      =========================================================
+      RESPONSIVE DESIGN
+      =========================================================
+    */
+    @media (max-width: 768px) {
+      .nav-toggle {
+        display: flex;
+      }
+      .nav-links {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 100%;
+        background-color: var(--light-bg);
+        padding: 20px;
+        flex-direction: column;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+      .nav-links.active {
+        display: flex;
+      }
+      .nav-links li {
+        margin: 10px 0;
+      }
+
+      .bfmp-form-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ========== NAVBAR ========== -->
+  <nav class="navbar">
+    <div class="container">
+      <div class="logo">
+        <!-- Sample Logo -->
+        <a href="index.html">
+          <img src="https://via.placeholder.com/200x60?text=Franmarine+Logo" alt="Franmarine Logo" />
+        </a>
+      </div>
+      <div class="nav-toggle" id="navToggle">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="#" class="active">Home</a></li>
+        <li><a href="#">About Us</a></li>
+        <li><a href="#">Technology</a></li>
+        <li><a href="#">Environment</a></li>
+        <li><a href="#">Blog</a></li>
+        <li><a href="#">Gallery</a></li>
+        <li><a href="#">Contact</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- ========== HERO SECTION ========== -->
+  <section class="hero">
+    <div class="hero-content">
+      <h1>Biofouling Plan Generator</h1>
+      <p>Create a customized Biofouling Management Plan in minutes. Simply fill out the vessel details below, and we'll produce a plan you can download or print—helping you meet regulatory requirements and protect our oceans.</p>
+      <a href="#bfmpGenerator" class="btn-primary">Get Started</a>
+    </div>
+  </section>
+
+  <!-- ========== BFMP GENERATOR SECTION ========== -->
+  <section class="bfmp-section" id="bfmpGenerator">
+    <div class="container">
+      <h2>Generate Your BFMP</h2>
+      <p class="intro-text">
+        A Biofouling Management Plan (BFMP) describes the steps your vessel takes to prevent invasive aquatic species from hitching
+        a ride on your hull and niche areas. By completing this form, you’ll produce a professional plan that meets the IMO and
+        Australian biosecurity guidelines. Remember to keep this document onboard and review it regularly.
+      </p>
+
+      <div class="bfmp-form-grid">
+        <!-- LEFT: The Form -->
+        <div class="bfmp-form">
+          <form id="bfmpForm">
+            <div class="form-field">
+              <label for="vesselName">Vessel Name <span style="color:red">*</span></label>
+              <input type="text" id="vesselName" name="vesselName" required />
+            </div>
+            <div class="form-field">
+              <label for="imoNumber">IMO Number <span style="color:red">*</span></label>
+              <input type="text" id="imoNumber" name="imoNumber" required />
+            </div>
+            <div class="form-field">
+              <label for="planDate">Plan Date <span style="color:red">*</span></label>
+              <input type="date" id="planDate" name="planDate" required />
+            </div>
+            <div class="form-field">
+              <label for="authorName">Author / Prepared By</label>
+              <input type="text" id="authorName" name="authorName" placeholder="e.g. John Smith" />
+            </div>
+            <div class="form-field">
+              <label for="approverName">Approved By</label>
+              <input type="text" id="approverName" name="approverName" placeholder="e.g. Jane Doe" />
+            </div>
+            <div class="form-field">
+              <label for="versionNumber">Version</label>
+              <input type="text" id="versionNumber" name="versionNumber" placeholder="e.g. 1.0" />
+            </div>
+            <div class="form-field">
+              <label for="reviewDate">Next Review Date <span style="color:red">*</span></label>
+              <input type="date" id="reviewDate" name="reviewDate" required />
+            </div>
+            <div class="form-field">
+              <label for="vesselFlag">Vessel Flag</label>
+              <input type="text" id="vesselFlag" name="vesselFlag" placeholder="e.g. Panama" />
+            </div>
+            <div class="form-field">
+              <label for="vesselType">Vessel Type</label>
+              <input type="text" id="vesselType" name="vesselType" placeholder="e.g. Bulk Carrier" />
+            </div>
+            <div class="form-field">
+              <label for="grossTonnage">Gross Tonnage</label>
+              <input type="text" id="grossTonnage" name="grossTonnage" placeholder="e.g. 50,000" />
+            </div>
+            <div class="form-field">
+              <label for="vesselLength">Length Overall (m)</label>
+              <input type="text" id="vesselLength" name="vesselLength" placeholder="e.g. 225" />
+            </div>
+            <div class="form-field">
+              <label for="vesselBeam">Beam (m)</label>
+              <input type="text" id="vesselBeam" name="vesselBeam" placeholder="e.g. 32.2" />
+            </div>
+            <div class="form-field">
+              <label for="vesselDraft">Depth / Draft (m)</label>
+              <input type="text" id="vesselDraft" name="vesselDraft" placeholder="e.g. 12.3" />
+            </div>
+            <div class="form-field">
+              <label for="operatingAreas">Typical Operating Areas / Routes</label>
+              <textarea id="operatingAreas" name="operatingAreas" placeholder="e.g. Asia-Pacific, Indian Ocean..."></textarea>
+            </div>
+            <div class="form-field">
+              <label for="typicalSpeed">Typical Operating Speed (knots)</label>
+              <input type="text" id="typicalSpeed" name="typicalSpeed" placeholder="e.g. 14" />
+            </div>
+            <div class="form-field">
+              <label for="periodsUnderway">Periods Underway vs. Stationary</label>
+              <textarea id="periodsUnderway" name="periodsUnderway" placeholder="e.g. Usually at sea for 20-30 days..."></textarea>
+            </div>
+            <div class="form-field">
+              <label for="vesselPhoto">Vessel Photo (optional)</label>
+              <input type="file" id="vesselPhoto" name="vesselPhoto" accept="image/*" />
+              <div class="note">
+                If provided, your vessel's photo will appear on the cover page of the Plan.
+              </div>
+            </div>
+            <button type="button" id="generateBtn">Generate Plan</button>
+          </form>
+        </div>
+
+        <!-- RIGHT: Helpful Info or FAQs -->
+        <div class="bfmp-help">
+          <h3><i class="fas fa-info-circle"></i> Need Help?</h3>
+          <p>
+            <strong>Vessel Name & IMO:</strong><br />
+            Required by all maritime authorities to uniquely identify your ship.
+          </p>
+          <p>
+            <strong>Plan Date & Review Date:</strong><br />
+            The date you create/approve the plan and when you’ll review or renew it.
+          </p>
+          <p>
+            <strong>Operating Areas & Speed:</strong><br />
+            Helps determine how quickly fouling might accumulate based on local waters, climates, or stationary periods.
+          </p>
+          <p>
+            <strong>Why a BFMP?</strong><br />
+            Biofouling can increase fuel costs and spread invasive species. Many ports now demand a BFMP at entry.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== FOOTER ========== -->
+  <footer>
+    <div class="footer-content">
+      <img src="https://via.placeholder.com/200x60?text=Franmarine+Logo" alt="Franmarine Logo" />
+      <div class="footer-links">
+        <a href="#">About Us</a>
+        <a href="#">Technology</a>
+        <a href="#">Environment</a>
+        <a href="#">Blog</a>
+        <a href="#">Gallery</a>
+      </div>
+      <div class="footer-bottom">
+        <p>© 2025 Franmarine. All Rights Reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ========== BFMP HANDLEBARS TEMPLATE ========== -->
+  <script id="bfmp-template" type="text/x-handlebars-template">
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <title>Biofouling Management Plan (BFMP)</title>
+      <style>
+        /* 
+          ===========================
+          MAIN LAYOUT FOR THE BFMP
+          ===========================
+        */
+        @page {
+          size: A4;
+          margin: 2.5cm 2cm;
+        }
+        body {
+          margin: 0;
+          padding: 2.5cm 2cm;
+          font-family: Arial, sans-serif;
+          font-size: 11pt;
+          line-height: 1.5;
+          color: #000;
+          background: white;
+        }
+        .header, .footer {
+          position: fixed;
+          left: 2cm;
+          right: 2cm;
+          height: 2cm;
+          background: white;
+        }
+        .header {
+          top: 0.5cm;
+          border-bottom: 1px solid #000;
+          padding-bottom: 0.5cm;
+        }
+        .footer {
+          bottom: 0.5cm;
+          border-top: 1px solid #000;
+          padding-top: 0.3cm;
+        }
+        .footer .page-number {
+          text-align: center;
+          width: 100%;
+        }
+        .pagenum:before {
+          content: "Page ";
+        }
+        .pagenum:after {
+          content: " of " counter(pages);
+        }
+
+        h1 {
+          font-size: 16pt;
+          margin: 2cm 0 1cm;
+          padding: 0;
+          page-break-after: avoid;
+          color: #0A2B7B;
+        }
+        h2 {
+          font-size: 14pt;
+          color: #0A2B7B;
+          margin: 1.5cm 0 0.5cm;
+          padding-bottom: 0.3cm;
+          border-bottom: 1px solid #000;
+          page-break-after: avoid;
+        }
+        h3 {
+          font-size: 12pt;
+          margin-top: 1.2cm;
+          color: #0A2B7B;
+        }
+        p {
+          margin: 0 0 1em 0;
+        }
+        ul {
+          margin: 0.5cm 0;
+          padding-left: 1.2cm;
+        }
+        li {
+          margin-bottom: 0.2cm;
+        }
+        table {
+          width: 100%;
+          border-collapse: collapse;
+          margin: 1cm 0;
+          page-break-inside: avoid;
+        }
+        th, td {
+          border: 1px solid #000;
+          padding: 0.3cm;
+          text-align: left;
+          vertical-align: top;
+        }
+        th {
+          background-color: #f5f5f5;
+        }
+        .note-box {
+          background-color: #f8f9fa;
+          border-left: 4px solid #0A2B7B;
+          padding: 1rem;
+          margin: 1rem 0;
+          page-break-inside: avoid;
+        }
+        .example-row {
+          background-color: #f0f7ff;
+        }
+        .example-row td {
+          color: #666;
+          font-style: italic;
+        }
+        .entry-row td {
+          height: 2.5rem;
+          min-width: 100px;
+        }
+        .maintenance-log p {
+          margin: 0.5rem 0;
+          min-height: 1.5rem;
+        }
+        .signature-line {
+          display: inline-block;
+          min-width: 200px;
+          border-bottom: 1px solid #000;
+          margin-left: 1rem;
+        }
+        @media print {
+          .page {
+            page-break-after: always;
+          }
+          h1, h2, h3 {
+            page-break-after: avoid;
+          }
+          ul, ol {
+            page-break-inside: avoid;
+          }
+          .header, .footer {
+            position: fixed;
+            background: none;
+          }
+          .note-box {
+            background-color: #fff !important;
+            border-left: 2px solid #000;
+          }
+          .example-row {
+            background-color: #fff !important;
+          }
+          .entry-row td {
+            border: 1px solid #000;
+          }
+        }
+
+        /* Cover Page Styling */
+        .cover-page {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          text-align: center;
+          padding-top: 80px;
+          min-height: 90vh;
+        }
+        .cover-title {
+          font-size: 28pt;
+          margin-bottom: 0.3em;
+          color: #0A2B7B;
+        }
+        .cover-subtitle {
+          font-size: 16pt;
+          margin-bottom: 1.2em;
+          color: #333;
+        }
+        .cover-details {
+          margin: 0.4em 0;
+          font-size: 12pt;
+        }
+        .cover-image-container {
+          margin-top: 2em;
+          margin-bottom: 1em;
+          text-align: center;
+        }
+        .cover-image-container img {
+          max-width: 300px;
+          height: auto;
+          border: 1px solid #ccc;
+        }
+      </style>
+    </head>
+    <body>
+      <!-- Header -->
+      <div class="header">
+        <div style="font-weight:bold; font-size:12pt;">{{vesselName}} - Biofouling Management Plan</div>
+      </div>
+
+      <!-- Footer -->
+      <div class="footer">
+        <div class="page-number">Page <span class="pagenum"></span></div>
+      </div>
+
+      <!-- Cover Page -->
+      <div class="page cover-page">
+        <div class="cover-title">BIOFOULING MANAGEMENT PLAN</div>
+        <div class="cover-subtitle">For Vessel: <span class="vessel-name">{{vesselName}}</span></div>
+        
+        {{#if vesselPhoto}}
+        <div class="cover-image-container">
+          <img src="{{vesselPhoto}}" alt="Vessel Photo"/>
+        </div>
+        {{/if}}
+
+        <p class="cover-details"><strong>IMO Number:</strong> {{imoNumber}}</p>
+        <p class="cover-details"><strong>Date:</strong> {{planDate}}</p>
+        <p class="cover-details"><strong>Author/Prepared By:</strong> {{authorName}}</p>
+        <p class="cover-details"><strong>Approved By:</strong> {{approverName}}</p>
+        <p class="cover-details"><strong>Version:</strong> {{versionNumber}}</p>
+        <p class="cover-details"><strong>Next Review Date:</strong> {{reviewDate}}</p>
+      </div>
+
+      <!-- Document Control -->
+      <div class="page">
+        <h1>Document Control</h1>
+        <div class="note-box">
+          <p><strong>Note:</strong> The following table contains an example entry. Additional rows should be added to track document revisions.</p>
+        </div>
+        <table>
+          <tr>
+            <th style="width:15%;">Version</th>
+            <th style="width:25%;">Date</th>
+            <th style="width:30%;">Author</th>
+            <th style="width:30%;">Summary of Changes</th>
+          </tr>
+          <tr class="example-row">
+            <td>{{versionNumber}}</td>
+            <td>{{planDate}}</td>
+            <td>{{authorName}}</td>
+            <td>Initial release</td>
+          </tr>
+          <tr><td></td><td></td><td></td><td></td></tr>
+          <tr><td></td><td></td><td></td><td></td></tr>
+        </table>
+        <p><strong>Approvals:</strong></p>
+        <p>Approved by: <span class="signature-line">_______________________</span></p>
+        <p>Date: <span class="signature-line">_______________________</span></p>
+      </div>
+
+      <!-- TABLE OF CONTENTS -->
+      <div class="page">
+        <h1>Table of Contents</h1>
+        <ol>
+          <li>Introduction</li>
+          <li>Purpose and Scope</li>
+          <li>Vessel Details</li>
+          <li>Operating Profile</li>
+          <li>Inspection and Cleaning Plan</li>
+          <li>Record Keeping</li>
+          <li>Emergency Procedures</li>
+          <li>Crew Training and Responsibilities</li>
+          <li>Appendices
+            <ol type="A">
+              <li>Appendix 1: Biofouling Record Book Template</li>
+              <li>Appendix 2: Paint Application Report</li>
+              <li>Appendix 3: Dry Dock Schedule</li>
+              <li>Appendix 4: Additional Guidelines and References</li>
+            </ol>
+          </li>
+        </ol>
+      </div>
+
+      <!-- 1. INTRODUCTION -->
+      <div class="page">
+        <h1>1. Introduction</h1>
+        <p>
+          This Biofouling Management Plan (BFMP) has been developed in accordance with:
+        </p>
+        <ul>
+          <li>Australian Biosecurity Act 2015</li>
+          <li>IMO Guidelines (MEPC.207(62))</li>
+          <li>Australian and New Zealand Anti-Fouling and In-Water Cleaning Guidelines (2023)</li>
+        </ul>
+        <p>
+          The BFMP describes the management actions undertaken to minimize the transfer of invasive aquatic species
+          via biofouling. Proper implementation of this plan helps ensure compliance with local and international
+          regulations, reduces potential environmental harm, and improves vessel performance.
+        </p>
+      </div>
+
+      <!-- 2. PURPOSE & SCOPE -->
+      <div class="page">
+        <h1>2. Purpose and Scope</h1>
+        <p>
+          The purpose of this document is to provide detailed guidance for managing biofouling on {{vesselName}}.
+          It specifies inspection and cleaning schedules, roles and responsibilities, record-keeping requirements,
+          and emergency procedures to ensure compliance with Australian biosecurity and international maritime
+          guidelines.
+        </p>
+        <p>
+          This BFMP applies to all components of the vessel’s hull, niche areas, and internal seawater systems
+          that may contribute to biofouling. It is to be followed by all crew, contractors, and any other
+          personnel involved in maintenance and operation of {{vesselName}}.
+        </p>
+      </div>
+
+      <!-- 3. VESSEL DETAILS -->
+      <div class="page">
+        <h1>3. Vessel Details</h1>
+        <table>
+          <tr><th style="width:30%">Item</th><th style="width:70%">Details</th></tr>
+          <tr><td>Vessel Name</td><td>{{vesselName}}</td></tr>
+          <tr><td>IMO Number</td><td>{{imoNumber}}</td></tr>
+          <tr><td>Flag</td><td>{{vesselFlag}}</td></tr>
+          <tr><td>Type</td><td>{{vesselType}}</td></tr>
+          <tr><td>Gross Tonnage</td><td>{{grossTonnage}}</td></tr>
+          <tr><td>Length Overall (m)</td><td>{{vesselLength}}</td></tr>
+          <tr><td>Beam (m)</td><td>{{vesselBeam}}</td></tr>
+          <tr><td>Depth / Draft (m)</td><td>{{vesselDraft}}</td></tr>
+        </table>
+      </div>
+
+      <!-- 4. OPERATING PROFILE -->
+      <div class="page">
+        <h1>4. Operating Profile</h1>
+        <p>
+          <strong>Typical Operating Areas / Routes:</strong><br>
+          {{operatingAreas}}
+        </p>
+        <p>
+          <strong>Typical Operating Speed:</strong> {{typicalSpeed}} knots
+        </p>
+        <p>
+          <strong>Periods Underway vs. Stationary:</strong><br>
+          {{periodsUnderway}}
+        </p>
+        <p>
+          <strong>Planned Dry-Docking Interval:</strong> Every 4 years
+        </p>
+        <p>
+          The vessel’s activity level directly influences biofouling accumulation. Extended stationary periods in
+          port or anchorage will warrant increased frequency of inspections to detect potential fouling.
+        </p>
+      </div>
+
+      <!-- 5. INSPECTION AND CLEANING PLAN -->
+      <div class="page">
+        <h1>5. Inspection and Cleaning Plan</h1>
+        <p>
+          The inspection and cleaning plan is designed to monitor and control biofouling across all areas of
+          {{vesselName}}. It outlines specific schedules for the hull, niche areas, and internal seawater systems.
+          All inspection and cleaning activities should be recorded in the Biofouling Record Book (BFRB).
+        </p>
+        <h2>5.1 Hull Surfaces</h2>
+        <ul>
+          <li><strong>Areas:</strong> Vertical sides, waterline, transom, skeg, flat bottom, bow.</li>
+          <li><strong>Inspection Frequency:</strong> Comprehensive annual inspection by accredited divers or
+              remotely operated vehicles (ROVs). Additional inspections if the vessel remains stationary for
+              extended periods (exceeding 30 days) or after high-risk port calls.</li>
+          <li><strong>Cleaning Frequency:</strong> In-water cleaning at least annually, with captured waste
+              disposal. Full cleaning and anti-fouling coating renewal during dry-docking every 4 years.</li>
+        </ul>
+        <h2>5.2 Niche Areas</h2>
+        <ul>
+          <li><strong>Areas:</strong> Propellers, rudders, shafts, rope guards, bilge keels, stabilizers, bow
+              thrusters, sea chests and gratings, keel coolers, anchor lockers.</li>
+          <li><strong>Inspection Frequency:</strong> Every 6 months for critical niche areas. Annual diver/ROV
+              inspection for all niche areas. Increased frequency when operating in known biofouling hotspots.</li>
+          <li><strong>Cleaning Frequency:</strong> Clean as necessary based on inspection findings. Typically
+              aligned with hull in-water cleaning (annually). Propeller polishing at least once a year or
+              whenever performance deterioration is observed.</li>
+        </ul>
+        <h2>5.3 Internal Systems</h2>
+        <ul>
+          <li><strong>Systems:</strong> Ballast water systems, internal seawater cooling pipes, sea chests,
+              fire-fighting systems, any cross-over piping with direct sea connection.</li>
+          <li><strong>Inspection Frequency:</strong> Quarterly checks for growth accumulation. Biannual
+              comprehensive inspection to identify any significant fouling.</li>
+          <li><strong>Cleaning Frequency:</strong> Biannual cleaning with appropriate flushing methods or
+              mechanical removal. Additional cleaning if inspections reveal biofouling buildup.</li>
+        </ul>
+        <h2>5.4 Dry-Docking</h2>
+        <p>
+          Dry-docking is scheduled every 4 years. During this period:
+        </p>
+        <ul>
+          <li>Full inspection and cleaning of all underwater surfaces.</li>
+          <li>Renewal of anti-fouling coating system as per manufacturer’s recommendations.</li>
+          <li>Inspection and overhaul of sea chests, anodes, shafts, and other auxiliary systems.</li>
+          <li>Any paint touch-ups or reapplication as needed based on inspection results.</li>
+        </ul>
+      </div>
+
+      <!-- 6. RECORD KEEPING -->
+      <div class="page">
+        <h1>6. Record Keeping</h1>
+        <p>
+          A dedicated Biofouling Record Book (BFRB) must be maintained onboard to document all inspection,
+          cleaning, and maintenance activities related to biofouling management. This includes:
+        </p>
+        <ul>
+          <li>Date and location of inspections or cleaning.</li>
+          <li>Method of inspection or cleaning.</li>
+          <li>Areas inspected or cleaned and the extent of any fouling found.</li>
+          <li>Results of inspections, including photographs if available.</li>
+          <li>Names and credentials of personnel or contractors performing inspections and cleaning.</li>
+        </ul>
+        <p>
+          The master, chief engineer, or assigned environmental officer is responsible for ensuring timely
+          and accurate records. The BFRB should be available for review by relevant authorities when requested.
+        </p>
+      </div>
+
+      <!-- 7. EMERGENCY PROCEDURES -->
+      <div class="page">
+        <h1>7. Emergency Procedures</h1>
+        <p>
+          In the event of equipment failure, accidental discharge, or any other incident impacting the vessel’s
+          biofouling management practices, the following steps shall be taken:
+        </p>
+        <ul>
+          <li>Notify the Vessel Master or Officer on Watch immediately.</li>
+          <li>Isolate and contain any discharge if safe and feasible.</li>
+          <li>Record the incident details in the BFRB, including time, location, nature of the incident, and
+              measures taken to mitigate harm.</li>
+          <li>Inform relevant port authorities or regulatory agencies as required by local and national legislation.</li>
+          <li>Implement temporary or alternative control measures to minimize additional biofouling until
+              permanent repairs or procedures can be carried out.</li>
+        </ul>
+      </div>
+
+      <!-- 8. CREW TRAINING AND RESPONSIBILITIES -->
+      <div class="page">
+        <h1>8. Crew Training and Responsibilities</h1>
+        <h2>8.1 Roles and Responsibilities</h2>
+        <ul>
+          <li><strong>Vessel Master:</strong> Overall responsibility for the BFMP implementation and compliance.</li>
+          <li><strong>Chief Engineer / Environmental Officer:</strong> Ensures scheduled inspections and cleaning
+              activities are performed and recorded; oversees the BFRB updates.</li>
+          <li><strong>Maintenance Crew:</strong> Conducts routine checks, cleaning operations, and assists with
+              diver or ROV inspections. Reports any anomalies or suspected fouling buildup.</li>
+        </ul>
+        <h2>8.2 Training</h2>
+        <p>
+          Regular training shall be provided to all relevant crew members covering:
+        </p>
+        <ul>
+          <li>General awareness of biofouling and invasive aquatic species.</li>
+          <li>BFMP requirements and record-keeping procedures.</li>
+          <li>Safe diving and in-water cleaning operations (if applicable).</li>
+          <li>Use of personal protective equipment (PPE) and compliance with occupational health and safety standards.</li>
+          <li>Emergency and contingency procedures related to biofouling incidents.</li>
+        </ul>
+      </div>
+
+      <!-- 9. APPENDICES -->
+      <div class="page">
+        <h1>9. Appendices</h1>
+
+        <!-- Appendix 1 -->
+        <h2>Appendix 1: Biofouling Record Book</h2>
+        <div class="note-box">
+          <p><strong>Instructions:</strong> Use this template to record all biofouling-related activities. The first row shows an example entry to demonstrate proper record-keeping. Add new entries in the blank rows provided.</p>
+        </div>
+        <h3>Section A: Inspection and Cleaning Records</h3>
+        <table>
+          <tr>
+            <th>Date</th>
+            <th>Location</th>
+            <th>Activity Type</th>
+            <th>Areas Covered</th>
+            <th>Findings/Actions</th>
+            <th>Conducted By</th>
+            <th>Signature</th>
+          </tr>
+          <tr class="example-row">
+            <td>01/01/2024</td>
+            <td>Brisbane, AU</td>
+            <td>ROV Inspection</td>
+            <td>Hull & Niche Areas</td>
+            <td>Light slime on waterline; cleaned affected areas</td>
+            <td>John Smith<br>ABC Diving Co.</td>
+            <td>[Signature]</td>
+          </tr>
+          <!-- Empty rows for actual entries -->
+          <tr class="entry-row">
+            <td>____/____/____</td><td></td><td></td><td></td><td></td><td></td><td></td>
+          </tr>
+          <tr class="entry-row">
+            <td>____/____/____</td><td></td><td></td><td></td><td></td><td></td><td></td>
+          </tr>
+          <tr class="entry-row">
+            <td>____/____/____</td><td></td><td></td><td></td><td></td><td></td><td></td>
+          </tr>
+        </table>
+
+        <h3>Section B: Anti-fouling System Details</h3>
+        <table>
+          <tr>
+            <th>Application Date</th>
+            <th>Product Name</th>
+            <th>Manufacturer</th>
+            <th>Areas Covered</th>
+            <th>Applicator</th>
+            <th>Next Renewal Due</th>
+          </tr>
+          <tr class="example-row">
+            <td>15/12/2023</td>
+            <td>SeaShield Plus</td>
+            <td>Marine Coatings Int.</td>
+            <td>Full hull surface</td>
+            <td>XYZ Shipyard</td>
+            <td>15/12/2027</td>
+          </tr>
+          <!-- Empty rows for actual entries -->
+          <tr class="entry-row">
+            <td>____/____/____</td><td></td><td></td><td></td><td></td><td>____/____/____</td>
+          </tr>
+          <tr class="entry-row">
+            <td>____/____/____</td><td></td><td></td><td></td><td></td><td>____/____/____</td>
+          </tr>
+        </table>
+
+        <h3>Section C: Maintenance Notes and Observations</h3>
+        <div class="note-box">
+          <p><strong>Example Entry:</strong><br>
+          Date: 01/03/2024<br>
+          Observer: Chief Engineer<br>
+          Note: Increased resistance noted during operation. Scheduled underwater inspection for next port call.</p>
+        </div>
+        <div class="maintenance-log">
+          <p>Date: ____/____/____ Observer: _________________</p>
+          <p>Notes: _________________________________________________</p>
+          <p>________________________________________________________</p>
+          <br>
+          <p>Date: ____/____/____ Observer: _________________</p>
+          <p>Notes: _________________________________________________</p>
+          <p>________________________________________________________</p>
+          <br>
+          <p>Date: ____/____/____ Observer: _________________</p>
+          <p>Notes: _________________________________________________</p>
+          <p>________________________________________________________</p>
+        </div>
+      </div>
+
+      <!-- Appendix 2 -->
+      <h2>Appendix 2: Paint Application Report</h2>
+      <p>
+        During dry-docking or scheduled maintenance, use the following form or equivalent documentation
+        to capture details of new or renewed anti-fouling coatings:
+      </p>
+      <ul>
+        <li><strong>Date of Application:</strong></li>
+        <li><strong>Location of Application:</strong></li>
+        <li><strong>Paint Manufacturer & Product Name:</strong></li>
+        <li><strong>Dry Film Thickness (DFT):</strong></li>
+        <li><strong>Application Method:</strong></li>
+        <li><strong>Number of Coats:</strong></li>
+        <li><strong>Areas Covered:</strong></li>
+        <li><strong>Contractor / Applicator Name:</strong></li>
+      </ul>
+
+      <!-- Appendix 3 -->
+      <h2>Appendix 3: Dry Dock Schedule</h2>
+      <p>
+        The vessel’s planned dry-docking occurs on a 4-year cycle. Refer to the vessel’s maintenance schedule
+        or planned maintenance system (PMS) for the specific dry-dock windows. Full hull cleaning and renewal
+        of the anti-fouling system is undertaken at each dry-dock period. Intermediate dockings or shorter
+        haul-outs may occur as necessary based on inspection results or voyage requirements.
+      </p>
+
+      <!-- Appendix 4 -->
+      <h2>Appendix 4: Additional Guidelines and References</h2>
+      <ul>
+        <li>IMO Guidelines for the Control and Management of Ships' Biofouling (MEPC.207(62))</li>
+        <li>Australian Biosecurity Act 2015</li>
+        <li>Australian and New Zealand Anti-Fouling and In-Water Cleaning Guidelines (2023)</li>
+        <li>International Convention for the Control and Management of Ships' Ballast Water and Sediments (BWM)</li>
+        <li>Any relevant Port State or local regulations in the vessel’s operating regions</li>
+      </ul>
+    </body>
+    </html>
+  </script>
+
+  <!-- ========== CLIENT-SIDE SCRIPT ========== -->
+  <script>
+    // Mobile Nav Toggle
+    const navToggle = document.getElementById('navToggle');
+    const navLinks = document.getElementById('navLinks');
+    navToggle.addEventListener('click', () => {
+      navLinks.classList.toggle('active');
+    });
+
+    // Wait until DOM is loaded for the BFMP form
+    window.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('generateBtn').addEventListener('click', async () => {
+        // Collect form data
+        const form = document.getElementById('bfmpForm');
+        const formData = new FormData(form);
+
+        // Build data object
+        const data = {
+          vesselName: formData.get('vesselName') || '',
+          imoNumber: formData.get('imoNumber') || '',
+          planDate: formData.get('planDate') || '',
+          authorName: formData.get('authorName') || '',
+          approverName: formData.get('approverName') || '',
+          versionNumber: formData.get('versionNumber') || '',
+          reviewDate: formData.get('reviewDate') || '',
+          vesselFlag: formData.get('vesselFlag') || '',
+          vesselType: formData.get('vesselType') || '',
+          grossTonnage: formData.get('grossTonnage') || '',
+          vesselLength: formData.get('vesselLength') || '',
+          vesselBeam: formData.get('vesselBeam') || '',
+          vesselDraft: formData.get('vesselDraft') || '',
+          operatingAreas: formData.get('operatingAreas') || '',
+          typicalSpeed: formData.get('typicalSpeed') || '',
+          periodsUnderway: formData.get('periodsUnderway') || '',
+          vesselPhoto: ''
+        };
+
+        // Convert photo to Base64 if provided
+        const file = formData.get('vesselPhoto');
+        if (file && file.size > 0) {
+          data.vesselPhoto = await toBase64(file);
+        }
+
+        // Compile Handlebars template
+        const templateSource = document.getElementById('bfmp-template').innerHTML;
+        const template = Handlebars.compile(templateSource);
+
+        // Render final HTML
+        const planHtml = template(data);
+
+        // Open in new tab
+        const newWindow = window.open('', '_blank');
+        newWindow.document.write(planHtml);
+        newWindow.document.close();
+      });
+    });
+
+    // Helper: convert file to Base64
+    function toBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = error => reject(error);
+        reader.readAsDataURL(file);
+      });
+    }
+  </script>
+</body>
+</html>
